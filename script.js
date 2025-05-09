@@ -104,26 +104,75 @@ document.addEventListener("DOMContentLoaded", () => {
         window.print();
     });
 
+    // Get appraisal data for saving
+    function getAppraisalData() {
+        // Collect form data
+        const formData = {};
+        for (const key in formElements) {
+            if (formElements[key]) {
+                formData[key] = formElements[key].value;
+            }
+        }
+
+        // Collect articles data
+        const articles = [];
+        articlesContainer.querySelectorAll(".article").forEach(articleDiv => {
+            const articleText = articleDiv.querySelector("textarea").value;
+            articles.push({ description: articleText });
+        });
+
+        // Return complete appraisal data
+        return {
+            ...formData,
+            articles: articles,
+            generatedAt: new Date().toISOString()
+        };
+    }
+
+    // Save appraisal to server
+    async function saveAppraisalToServer(appraisalData) {
+        try {
+            const response = await fetch('/api/appraisals', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(appraisalData)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to save appraisal');
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('Error saving appraisal:', error);
+            throw error;
+        }
+    }
+
     // Download functionality
-    downloadBtn.addEventListener("click", () => {
+    downloadBtn.addEventListener("click", async () => {
         const clientName = clientNameInput.value.trim().replace(/[^a-zA-Z0-9]/g, "_") || "CLIENTNAME";
         const currentDate = new Date().toISOString().slice(0, 10);
         const fileName = `appraisal_${clientName}_${currentDate}.html`;
 
         // Create a clone of the printable content
         const printableContent = document.querySelector(".container").cloneNode(true);
-        
+
         // Remove buttons from the cloned content
         printableContent.querySelectorAll(".action-buttons, #addArticleBtn, .removeArticleBtn").forEach(el => el.remove());
-        
-        // Inline styles for inputs for better download appearance (optional, but can help)
+
+        // Inline styles for inputs for better download appearance
         printableContent.querySelectorAll("input[type=\"text\"], input[type=\"date\"], textarea").forEach(input => {
             input.style.border = "none";
             input.setAttribute("readonly", true); // Make them readonly in the downloaded file
         });
-        
+
         const htmlContent = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Appraisal</title><link rel="stylesheet" href="style.css"><style>body{margin:20px;} .container{border:1px solid #000 !important; box-shadow:none !important;} input, textarea { background-color: transparent !important; -webkit-print-color-adjust: exact !important; color-adjust: exact !important; } </style></head><body>${printableContent.outerHTML}</body></html>`;
 
+        // Client-side download
         const blob = new Blob([htmlContent], { type: "text/html" });
         const link = document.createElement("a");
         link.href = URL.createObjectURL(blob);
@@ -133,9 +182,16 @@ document.addEventListener("DOMContentLoaded", () => {
         document.body.removeChild(link);
         URL.revokeObjectURL(link.href);
 
-        // Server-side save - This part requires a backend. For now, we will notify the user.
-        // console.log("Data for server save:", { clientName: clientNameInput.value, appraisalDate: appraisalDateInput.value, articles: JSON.parse(localStorage.getItem("articles")) });
-        alert("Appraisal downloaded. Server-side saving would require a backend setup.");
+        // Server-side save
+        try {
+            const appraisalData = getAppraisalData();
+            const serverResponse = await saveAppraisalToServer(appraisalData);
+            console.log('Appraisal saved to server:', serverResponse);
+            alert(`Appraisal downloaded and saved to server. ID: ${serverResponse.id}`);
+        } catch (error) {
+            console.error('Failed to save appraisal to server:', error);
+            alert(`Appraisal downloaded, but could not be saved to server: ${error.message || 'Server connection failed'}`);
+        }
     });
 
     // Initial load
