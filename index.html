@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Appraisal Generator</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo-container">
+                <!-- Placeholder for logo, can be an img tag if a logo file is provided -->
+                <div class="logo-placeholder">D</div> 
+                <div>
+                    <h1>APPRAISAL</h1>
+                    <div class="company-info">
+                        <p>Debbie Noble Designs</p>
+                        <p>333 Washington Street, Boston MA 02108</p>
+                        <p>(508)380-2661</p>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <section class="certification-statement">
+            <p>We herewith certify that we have this day carefully examined the following listed and described articles, the property of:</p>
+        </section>
+
+        <section class="client-info">
+            <div class="form-group">
+                <label for="clientName">Client Name</label>
+                <input type="text" id="clientName" name="clientName">
+            </div>
+            <div class="form-group">
+                <label for="address1">Address line 1</label>
+                <input type="text" id="address1" name="address1">
+            </div>
+            <div class="form-group">
+                <label for="address2">Address line 2</label>
+                <input type="text" id="address2" name="address2">
+            </div>
+            <div class="form-group date-group">
+                <label for="appraisalDate">Date:</label>
+                <input type="date" id="appraisalDate" name="appraisalDate">
+            </div>
+        </section>
+
+        <section class="article-description-section">
+            <h2>DESCRIPTION OF ARTICLE</h2>
+            <div id="articlesContainer">
+                <!-- Articles will be added here by JavaScript -->
+            </div>
+            <button type="button" id="addArticleBtn">Add Article</button>
+        </section>
+
+        <section class="appraised-value">
+            <div class="form-group">
+                <label for="appraisedValue">Appraised Value:</label>
+                <input type="text" id="appraisedValue" name="appraisedValue" value="$22,000.00">
+            </div>
+        </section>
+
+        <section class="appraiser-signature">
+            <div class="form-group">
+                <label for="appraiserName">APPRAISER</label>
+                <input type="text" id="appraiserName" name="appraiserName">
+            </div>
+        </section>
+
+        <footer>
+            <p class="disclaimer">
+                We estimate the Value as listed for Insurance or other purposes at the Current Retail Value, excluding Federal and other taxes.
+                In making this Appraisal, we DO NOT agree to purchase or replace the article(s) listed above.
+                The foregoing Appraisal is made with the understanding that the Appraiser assumes no liability with the respect to any action that may be taken on the basis of this Appraisal.
+            </p>
+        </footer>
+
+        <div class="action-buttons">
+            <button type="button" id="printBtn">Print</button>
+            <button type="button" id="downloadBtn">Download</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

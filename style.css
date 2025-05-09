@@ -1,0 +1,283 @@
+body {
+    font-family: 'Times New Roman', Times, serif;
+    margin: 0;
+    padding: 20px;
+    background-color: #f4f4f4;
+    color: #333;
+}
+
+.container {
+    max-width: 800px;
+    margin: auto;
+    background-color: #fff;
+    padding: 30px;
+    border: 1px solid #ccc;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    position: relative; /* For border elements */
+}
+
+/* Ornate border styling - simplified for web */
+.container::before, .container::after {
+    content: '';
+    position: absolute;
+    height: 98%; 
+    width: 10px;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="100"><path d="M0 0 Q5 50 0 100" stroke="black" fill="none" stroke-width="1"/></svg>'); /* Simplified flourish */
+    background-repeat: repeat-y;
+    top: 1%;
+}
+
+.container::before {
+    left: 10px;
+}
+
+.container::after {
+    right: 10px;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #000;
+}
+
+.logo-container {
+    display: flex;
+    align-items: center;
+    justify-content: center; 
+    gap: 20px; /* Space between logo and text */
+}
+
+.logo-placeholder {
+    width: 60px; 
+    height: 60px;
+    border: 2px solid #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2em;
+    font-weight: bold;
+    border-radius: 50%; /* Circular as in template */
+    background-color: #e0e0e0; /* Placeholder background */
+}
+
+header h1 {
+    margin: 0;
+    font-size: 2.5em;
+    font-weight: normal;
+    letter-spacing: 2px;
+}
+
+.company-info p {
+    margin: 2px 0;
+    font-size: 0.9em;
+}
+
+.certification-statement {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.client-info {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #ccc;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    margin-bottom: 5px;
+    font-weight: bold;
+    font-size: 0.9em;
+}
+
+.form-group input[type="text"],
+.form-group input[type="date"],
+.form-group textarea {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-family: inherit;
+    font-size: 1em;
+    width: 100%; /* Make inputs take full width of their container */
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
+}
+
+.date-group {
+    grid-column: 2 / 3; /* Span date to the right */
+    align-self: start; /* Align with top of client name */
+}
+
+.article-description-section h2 {
+    text-align: center;
+    font-size: 1.2em;
+    padding: 10px;
+    background-color: #e9e9e9;
+    border: 1px solid #ccc;
+    margin-bottom: 15px;
+}
+
+.article {
+    border: 1px solid #ddd;
+    padding: 15px;
+    margin-bottom: 15px;
+    background-color: #f9f9f9;
+}
+
+.article textarea {
+    min-height: 80px;
+    resize: vertical;
+}
+
+.article .form-group {
+    margin-bottom: 10px;
+}
+
+#addArticleBtn, .removeArticleBtn {
+    background-color: #5cb85c;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9em;
+    margin-top: 10px;
+}
+
+.removeArticleBtn {
+    background-color: #d9534f;
+    margin-left: 10px;
+}
+
+#addArticleBtn:hover, .removeArticleBtn:hover {
+    opacity: 0.9;
+}
+
+.appraised-value {
+    text-align: right;
+    margin-top: 20px;
+    margin-bottom: 30px;
+    font-size: 1.1em;
+    font-weight: bold;
+}
+
+.appraised-value .form-group {
+    display: inline-flex; /* Align label and input */
+    align-items: center;
+    gap: 10px;
+}
+
+.appraised-value input[type="text"] {
+    width: auto; /* Adjust width for value */
+    font-weight: bold;
+    text-align: right;
+}
+
+.appraiser-signature {
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid #000;
+}
+
+.appraiser-signature .form-group {
+    width: 200px; /* Limit width of appraiser input */
+}
+
+footer {
+    margin-top: 30px;
+    padding-top: 15px;
+    border-top: 1px solid #ccc;
+    text-align: center;
+}
+
+.disclaimer {
+    font-size: 0.8em;
+    color: #555;
+    line-height: 1.4;
+}
+
+.action-buttons {
+    text-align: center;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+}
+
+.action-buttons button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    margin: 0 10px;
+}
+
+.action-buttons button:hover {
+    background-color: #0056b3;
+}
+
+/* Print-specific styles */
+@media print {
+    body {
+        background-color: #fff;
+        padding: 0;
+        margin: 0;
+    }
+    .container {
+        width: 100%;
+        max-width: 100%;
+        margin: 0;
+        border: 2px solid #000; /* More prominent border for print */
+        box-shadow: none;
+        padding: 20mm 15mm; /* Standard A4/Letter margins */
+        box-sizing: border-box;
+    }
+    .action-buttons, #addArticleBtn, .removeArticleBtn {
+        display: none !important; /* Hide buttons in print view */
+    }
+    header, .client-info, .article-description-section, .appraised-value, .appraiser-signature, footer {
+        border-color: #000; /* Ensure borders are black for print */
+    }
+    .form-group input[type="text"],
+    .form-group input[type="date"],
+    .form-group textarea {
+        border: none; /* Remove borders from inputs for cleaner print */
+        background-color: transparent;
+        padding: 2px 0; /* Minimal padding */
+    }
+    .form-group input[type="text"]:not([value=""]) + label,
+    .form-group input[type="date"]:not([value=""]) + label,
+    .form-group textarea:not(:empty) + label {
+        /* Styles for labels when input has value, if needed for print */
+    }
+    .logo-placeholder {
+        border-color: #000;
+    }
+    .article-description-section h2 {
+        background-color: #f0f0f0; /* Light gray for section header */
+        border-color: #000;
+    }
+    .article {
+        border-color: #aaa;
+        background-color: transparent;
+        page-break-inside: avoid; /* Avoid breaking articles across pages */
+    }
+    .disclaimer {
+        font-size: 7pt; /* Smaller for print footer */
+    }
+    /* Ensure all text is black for printing */
+    * {
+        color: #000 !important;
+    }
+}
+
