@@ -4,16 +4,23 @@ body {
     padding: 20px;
     background-color: #f4f4f4;
     color: #333;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
 .container {
     max-width: 800px;
+    width: 100%;
     margin: auto;
     background-color: #fff;
     padding: 30px;
     border: 1px solid #ccc;
     box-shadow: 0 0 10px rgba(0,0,0,0.1);
     position: relative; /* For border elements */
+    display: flex;
+    flex-direction: column;
+    flex: 1;
 }
 
 /* Ornate border styling - simplified for web */
@@ -192,10 +199,11 @@ header h1 {
 }
 
 footer {
-    margin-top: 30px;
+    margin-top: auto;
     padding-top: 15px;
     border-top: 1px solid #ccc;
     text-align: center;
+    margin-bottom: 0;
 }
 
 .disclaimer {
