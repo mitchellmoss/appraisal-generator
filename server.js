@@ -3,9 +3,73 @@ const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
+const { AbuseIPDBClient } = require('abuseipdb-client'); // Corrected import
+require('dotenv').config(); // Load environment variables from .env file
 
 // IMPORTANT: Change this secret key and consider using an environment variable!
 const SHARED_SECRET_KEY = process.env.API_SECRET_KEY || '923948fnvu9823cnujrfef091cim9ij91m';
+const ABUSEIPDB_API_KEY = process.env.ABUSEIPDB_API_KEY;
+
+// Initialize AbuseIPDB client
+let abuseIpDbClient;
+if (ABUSEIPDB_API_KEY) {
+    abuseIpDbClient = new AbuseIPDBClient(ABUSEIPDB_API_KEY); // Corrected instantiation
+} else {
+    console.warn('ABUSEIPDB_API_KEY not found. IP checking will be skipped.');
+}
+
+// Middleware to check IP address against AbuseIPDB
+const checkIpAbuse = async (req, res, next) => {
+    if (!abuseIpDbClient) {
+        return next(); // Skip if client not initialized
+    }
+
+    // Attempt to get the real IP address, considering proxies
+    const ip = req.headers['x-forwarded-for']?.split(',').shift() || req.socket?.remoteAddress;
+
+    if (!ip) {
+        console.warn('Could not determine client IP address.');
+        return next(); // Or block if strict IP checking is required
+    }
+
+    // Skip for localhost or private IPs if desired (optional)
+    // if (ip === '::1' || ip === '127.0.0.1' || ip.startsWith('192.168.') || ip.startsWith('10.')) {
+    //     return next();
+    // }
+
+    try {
+        console.log(`[checkIpAbuse] Checking IP: ${ip}`); // Log IP being checked
+        // Corrected method call from checkIp to check
+        const reports = await abuseIpDbClient.check(ip);
+        
+        console.log(`[checkIpAbuse] Raw reports from AbuseIPDB for ${ip}:`, JSON.stringify(reports, null, 2)); // Log raw report
+
+        // Corrected path to access the data: reports.result.data
+        if (reports && reports.result && reports.result.data) {
+            const { abuseConfidenceScore, countryCode, usageType } = reports.result.data;
+            console.log(`[checkIpAbuse] Data for IP ${ip}: Score=${abuseConfidenceScore}, Country=${countryCode}, Usage=${usageType}`);
+
+            if (countryCode && countryCode !== 'US') {
+                console.log(`[checkIpAbuse] Blocking IP ${ip} from country ${countryCode} (Score: ${abuseConfidenceScore})`);
+                return res.status(403).json({ error: 'Access denied: Country not allowed.' });
+            }
+
+            if (abuseConfidenceScore && abuseConfidenceScore > 60) {
+                console.log(`[checkIpAbuse] Blocking IP ${ip} with abuse confidence score ${abuseConfidenceScore} (Country: ${countryCode})`);
+                return res.status(403).json({ error: 'Access denied: High abuse confidence score.' });
+            }
+            console.log(`[checkIpAbuse] IP ${ip} allowed (Score: ${abuseConfidenceScore}, Country: ${countryCode})`);
+        } else {
+            console.log(`[checkIpAbuse] No reports.result.data found for IP ${ip}. Allowing request. Full report: ${JSON.stringify(reports)}`);
+        }
+        next();
+    } catch (error) {
+        console.error(`[checkIpAbuse] Error checking IP ${ip} with AbuseIPDB:`, error.message, error.stack); // Log full error stack
+        // Decide if you want to block or allow access on API error
+        // For now, we'll allow access to prevent service disruption due to AbuseIPDB issues
+        next();
+    }
+};
 
 // Middleware to protect API routes
 const protectApi = (req, res, next) => {
@@ -22,6 +86,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Configure global middleware
+app.use(checkIpAbuse); // Check IP address first
 app.use(cors()); // Enable CORS for all routes
 app.use(express.json({ limit: '1mb' })); // Parse JSON request bodies
 app.use(express.static('.')); // Serve static files from current directory (e.g., index.html)
