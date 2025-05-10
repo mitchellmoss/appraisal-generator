@@ -549,17 +549,9 @@ footer {
         pointer-events: none;
     }
 
-    /* Add only the bottom decorative line and position it higher */
+    /* Remove the bottom decorative line */
     .container-inner-border::after {
-        content: '';
-        position: absolute;
-        bottom: 35mm; /* Positioned higher up */
-        left: 15mm;
-        right: 15mm;
-        height: 1px;
-        background-color: #d4af37;
-        pointer-events: none;
-        z-index: 1;
+        display: none;
     }
 
     /* Add decorative corner elements */
@@ -746,18 +738,15 @@ footer {
         right: 70px;
     }
 
-    /* Create only the bottom horizontal gold line */
+    /* Remove all decorative borders */
     .container-inner-border {
         position: absolute;
         top: 0;
         left: 0;
         right: 0;
         bottom: 0;
-        border-left: none;
-        border-right: none;
-        border-top: none; /* Remove top border */
-        border-bottom: 1px solid #d4af37;
-        margin: 20px 30px 60px 30px; /* Move bottom border up by increasing bottom margin */
+        border: none;
+        margin: 20px 30px 60px 30px;
         pointer-events: none;
         z-index: 1;
     }
