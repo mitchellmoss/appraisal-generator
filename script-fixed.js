@@ -58,6 +58,9 @@ document.addEventListener("DOMContentLoaded", () => {
     // Current appraisal being edited
     let currentAppraisal = null;
 
+    // Also make it available in window scope for print-fix.js
+    window.currentAppraisal = null;
+
     const formElements = {
         clientName: clientNameInput,
         address1: address1Input,
@@ -211,7 +214,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 filtered.sort((a, b) => {
                     // Extract numeric value for sorting
                     const getNumericValue = (str) => {
-                        if (!str) return 0;
+                        if (!str || str === 'Not specified') return 0;
+                        // Handle currency formatting and commas
                         return parseFloat(str.replace(/[^\d.-]/g, '')) || 0;
                     };
                     return getNumericValue(b.appraisedValue) - getNumericValue(a.appraisedValue);
@@ -250,10 +254,18 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             }
 
+            // Get appraised value - either from the top-level property or calculate from articles
+            let displayValue = appraisal.appraisedValue || 'Not specified';
+
+            // Format it for display
+            if (displayValue && displayValue !== 'Not specified' && !displayValue.startsWith('$')) {
+                displayValue = '$' + displayValue;
+            }
+
             row.innerHTML = `
                 <td>${appraisal.clientName || 'Unnamed Client'}</td>
                 <td>${formattedDate}</td>
-                <td>${appraisal.appraisedValue || 'Not specified'}</td>
+                <td>${displayValue}</td>
                 <td>
                     <div class="appraisal-actions">
                         <button class="edit-btn" data-id="${appraisal.id}">Edit</button>
@@ -306,11 +318,14 @@ document.addEventListener("DOMContentLoaded", () => {
         const appraisal = await fetchAppraisalById(appraisalId);
         if (!appraisal) return;
 
-        // Clear the current form
-        resetForm();
+        // Clear the current form but skip adding the default article
+        // since we'll be adding the saved articles next
+        resetForm(true);
 
         // Store the current appraisal
         currentAppraisal = appraisal;
+        // Make it available in the global scope for print-fix.js
+        window.currentAppraisal = appraisal;
 
         // Fill in the form fields
         for (const key in formElements) {
@@ -321,14 +336,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Add articles
         if (appraisal.articles && Array.isArray(appraisal.articles)) {
-            appraisal.articles.forEach(article => {
-                addArticle(article, false);
-            });
+            // If no articles, add at least one default article
+            if (appraisal.articles.length === 0) {
+                addArticle({ description: "Insert Description Here:", appraisedValue: "" }, false);
+            } else {
+                appraisal.articles.forEach(article => {
+                    addArticle(article, false);
+                });
+            }
+        } else {
+            // If no articles array, add a default article
+            addArticle({ description: "Insert Description Here:", appraisedValue: "" }, false);
         }
 
         // Show editing notice
         editingNotice.style.display = "block";
-        currentAppraisalId.textContent = `${appraisal.clientName} (ID: ${appraisal.id.substring(0, 8)}...)`;
+        currentAppraisalId.textContent = `${appraisal.clientName} (ID: ${appraisal.id})`;
 
         // Save form data to local storage
         saveFormData();
@@ -338,7 +361,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Reset the form and clear editing state
-    function resetForm() {
+    function resetForm(skipDefaultArticle = false) {
         // Clear form fields
         for (const key in formElements) {
             if (formElements[key]) {
@@ -351,13 +374,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Clear current appraisal
         currentAppraisal = null;
+        window.currentAppraisal = null;
 
         // Hide editing notice
         editingNotice.style.display = "none";
         currentAppraisalId.textContent = "";
 
-        // Add a default article
-        addArticle({ description: "Insert Description Here:", appraisedValue: "" }, true);
+        // Add a default article, unless skipped
+        if (!skipDefaultArticle) {
+            addArticle({ description: "Insert Description Here:", appraisedValue: "" }, true);
+        }
 
         // Save empty form to local storage
         localStorage.clear();
@@ -472,13 +498,37 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         });
 
-        // Return complete appraisal data
+        // Calculate the total appraised value from articles
+        let totalAppraisedValue = '';
+        if (articles.length > 0) {
+            let total = 0;
+            articles.forEach(article => {
+                const value = article.appraisedValue.replace(/[^0-9.-]+/g, "");
+                if (value && !isNaN(parseFloat(value))) {
+                    total += parseFloat(value);
+                }
+            });
+
+            // Format the total with dollar sign
+            if (total > 0) {
+                totalAppraisedValue = "$" + total.toLocaleString('en-US', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                });
+            }
+        }
+
+        // Return complete appraisal data with the calculated total
         return {
             ...formData,
             articles: articles,
+            appraisedValue: totalAppraisedValue,
             generatedAt: new Date().toISOString()
         };
     }
+
+    // Make it available in global scope for print-fix.js
+    window.getAppraisalData = getAppraisalData;
 
     // Save appraisal to server
     async function saveAppraisalToServer(appraisalData) {
@@ -518,9 +568,12 @@ document.addEventListener("DOMContentLoaded", () => {
                     ...appraisalData
                 };
 
+                // Update global window variable too
+                window.currentAppraisal = currentAppraisal;
+
                 // Show editing notice since we now have a saved appraisal
                 editingNotice.style.display = "block";
-                currentAppraisalId.textContent = `${appraisalData.clientName} (ID: ${result.id.substring(0, 8)}...)`;
+                currentAppraisalId.textContent = `${appraisalData.clientName} (ID: ${result.id})`;
             }
 
             return result;
@@ -529,6 +582,9 @@ document.addEventListener("DOMContentLoaded", () => {
             throw error;
         }
     }
+
+    // Make it available in global scope for print-fix.js
+    window.saveAppraisalToServer = saveAppraisalToServer;
 
     // Download functionality - only add event listener if button exists
     if (downloadBtn) {

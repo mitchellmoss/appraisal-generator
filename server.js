@@ -93,13 +93,39 @@ app.get('/api/appraisals', (req, res) => {
 
         const appraisals = files.map(file => {
             const data = JSON.parse(fs.readFileSync(path.join(APPRAISALS_DIR, file), 'utf8'));
+
+            // Calculate total appraised value from articles if available
+            let appraisedValue = data.appraisedValue || 'Not specified';
+
+            // If we have articles array, calculate the total
+            if (data.articles && Array.isArray(data.articles) && data.articles.length > 0) {
+                let total = 0;
+                data.articles.forEach(article => {
+                    if (article.appraisedValue) {
+                        // Extract numeric value (remove currency symbols, commas, etc.)
+                        const value = article.appraisedValue.replace(/[^0-9.-]+/g, "");
+                        if (value && !isNaN(parseFloat(value))) {
+                            total += parseFloat(value);
+                        }
+                    }
+                });
+
+                // Format with dollar sign and commas if we have a calculated value
+                if (total > 0) {
+                    appraisedValue = "$" + total.toLocaleString('en-US', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    });
+                }
+            }
+
             return {
                 id: data.id,
                 clientName: data.clientName,
                 createdAt: data.createdAt,
                 updatedAt: data.updatedAt,
                 appraisalDate: data.appraisalDate,
-                appraisedValue: data.appraisedValue
+                appraisedValue: appraisedValue
             };
         });
 
