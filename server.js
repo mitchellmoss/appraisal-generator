@@ -4,6 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
 const { AbuseIPDBClient } = require('abuseipdb-client'); // Corrected import
+const helmet = require('helmet');
 require('dotenv').config(); // Load environment variables from .env file
 
 // IMPORTANT: Change this secret key and consider using an environment variable!
@@ -87,6 +88,7 @@ const PORT = process.env.PORT || 3000;
 
 // Configure global middleware
 app.use(checkIpAbuse); // Check IP address first
+app.use(helmet()); // Set security-related HTTP headers
 app.use(cors()); // Enable CORS for all routes
 app.use(express.json({ limit: '1mb' })); // Parse JSON request bodies
 app.use(express.static('.')); // Serve static files from current directory (e.g., index.html)
