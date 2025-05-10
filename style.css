@@ -58,16 +58,9 @@ header {
 }
 
 .logo-placeholder {
-    width: 60px; 
+    width: 60px;
     height: 60px;
-    border: 2px solid #000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 2em;
-    font-weight: bold;
-    border-radius: 50%; /* Circular as in template */
-    background-color: #e0e0e0; /* Placeholder background */
+    object-fit: contain; /* Ensure SVG scales well */
 }
 
 header h1 {
@@ -464,7 +457,7 @@ footer {
 /* PDF Generation specific styles */
 .pdf-mode .container {
     background-color: #fff !important;
-    padding: 15mm 12mm !important;
+    padding: 20mm !important; /* Increased for better margins */
     box-sizing: border-box !important;
     border: none !important;
     box-shadow: none !important;
@@ -769,14 +762,10 @@ footer {
     }
 
     .logo-placeholder {
-        border: 1px solid #d4af37;
         background-color: transparent;
         color: #d4af37 !important;
         width: 40px;
         height: 40px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
     }
 
     .company-info p {
@@ -1041,7 +1030,7 @@ footer {
     }
 
     .disclaimer {
-        font-size: 7pt;
+        font-size: 8pt; /* Increased for better readability */
         color: #666 !important;
         line-height: 1.3;
         margin: 0 40px;
