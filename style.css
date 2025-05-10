@@ -431,6 +431,76 @@ footer {
     font-style: italic;
 }
 
+/* PDF Generation specific styles */
+.pdf-mode .container {
+    background-color: #fff !important;
+    padding: 15mm 12mm !important;
+    box-sizing: border-box !important;
+    border: none !important;
+    box-shadow: none !important;
+    position: relative !important;
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: 297mm !important;
+    height: auto !important;
+    width: 210mm !important;
+    margin: 0 auto !important;
+    flex: 1 !important;
+}
+
+.pdf-mode .header-top-border {
+    display: block;
+    position: absolute;
+    top: 8mm;
+    left: 15mm;
+    right: 15mm;
+    height: 1px;
+    background-color: #d4af37;
+    z-index: 3;
+}
+
+.pdf-mode .container-inner-border::after {
+    display: none;
+}
+
+.pdf-mode .appraiser-section-wrapper {
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    padding-top: 10mm;
+}
+
+.pdf-mode .appraiser-signature {
+    padding-top: 80px;
+    border-top: 1px solid #000;
+    position: relative;
+}
+
+.pdf-mode .appraiser-signature::before {
+    display: none;
+}
+
+.pdf-mode .action-buttons,
+.pdf-mode #addArticleBtn,
+.pdf-mode .removeArticleBtn {
+    display: none !important;
+}
+
+.pdf-mode footer {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid #ccc;
+    text-align: center;
+}
+
+.pdf-mode .input-value {
+    border-bottom: 1px dotted #999;
+    padding: 4px 0;
+    min-height: 1.2em;
+    font-family: inherit;
+    font-size: 12pt;
+}
+
 /* Print-specific styles */
 @media print {
     @page {
