@@ -13,6 +13,35 @@ document.addEventListener("DOMContentLoaded", () => {
     const browseBtn = document.getElementById("browseBtn");
     const clearFormBtn = document.getElementById("clearFormBtn");
 
+    // Function to calculate and update the total appraised value
+    function updateTotalAppraisedValue() {
+        let total = 0;
+
+        // Get all article appraised value inputs
+        const articleValueInputs = articlesContainer.querySelectorAll("input[id^='appraisedValue-']");
+
+        // Sum up the values
+        articleValueInputs.forEach(input => {
+            // Extract numeric value from the input (removing currency symbols, commas, etc.)
+            const value = input.value.replace(/[^0-9.-]+/g, "");
+            if (value && !isNaN(parseFloat(value))) {
+                total += parseFloat(value);
+            }
+        });
+
+        // Format the total with commas and dollar sign
+        const formattedTotal = total === 0 ? "" : "$" + total.toLocaleString('en-US', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+
+        // Update the total appraised value input
+        appraisedValueInput.value = formattedTotal;
+
+        // Save to local storage
+        localStorage.setItem("appraisedValue", formattedTotal);
+    }
+
     // Modal elements
     const appraisalBrowserModal = document.getElementById("appraisalBrowserModal");
     const closeModalBtn = document.querySelector(".close-modal");
@@ -34,7 +63,7 @@ document.addEventListener("DOMContentLoaded", () => {
         address1: address1Input,
         address2: address2Input,
         appraisalDate: appraisalDateInput,
-        appraisedValue: appraisedValueInput,
+        // appraisedValue is now calculated automatically, not user-edited
         appraiserName: appraiserNameInput,
     };
 
@@ -77,7 +106,11 @@ document.addEventListener("DOMContentLoaded", () => {
         const articles = [];
         articlesContainer.querySelectorAll(".article").forEach(articleDiv => {
             const articleText = articleDiv.querySelector("textarea").value;
-            articles.push({ description: articleText });
+            const appraisedValue = articleDiv.querySelector("input[id^='appraisedValue-']").value;
+            articles.push({
+                description: articleText,
+                appraisedValue: appraisedValue
+            });
         });
         localStorage.setItem("articles", JSON.stringify(articles));
 
@@ -299,6 +332,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Save form data to local storage
         saveFormData();
+
+        // Recalculate total appraised value
+        updateTotalAppraisedValue();
     }
 
     // Reset the form and clear editing state
@@ -321,10 +357,11 @@ document.addEventListener("DOMContentLoaded", () => {
         currentAppraisalId.textContent = "";
 
         // Add a default article
-        addArticle({ description: "Insert Description Here:" }, true);
+        addArticle({ description: "Insert Description Here:", appraisedValue: "" }, true);
 
         // Save empty form to local storage
         localStorage.clear();
+        updateTotalAppraisedValue(); // Reset the total appraised value
     }
 
     // Open the appraisal browser modal
@@ -339,12 +376,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Function to add a new article section
-    function addArticle(articleData = { description: "" }, shouldSave = true) {
+    function addArticle(articleData = { description: "", appraisedValue: "" }, shouldSave = true) {
         const articleId = `article-${Date.now()}`;
         const articleDiv = document.createElement("div");
         articleDiv.classList.add("article");
         articleDiv.id = articleId;
 
+        // Description Form Group
         const descriptionGroup = document.createElement("div");
         descriptionGroup.classList.add("form-group");
 
@@ -358,6 +396,26 @@ document.addEventListener("DOMContentLoaded", () => {
         descriptionTextarea.value = articleData.description;
         descriptionTextarea.addEventListener("input", saveFormData); // Save on edit
 
+        descriptionGroup.appendChild(descriptionLabel);
+        descriptionGroup.appendChild(descriptionTextarea);
+        articleDiv.appendChild(descriptionGroup);
+
+        // Appraised Value Input
+        const valueInput = document.createElement("input");
+        valueInput.type = "text";
+        valueInput.id = `appraisedValue-${articleId}`;
+        valueInput.name = `appraisedValue-${articleId}`;
+        valueInput.value = articleData.appraisedValue || "";
+        valueInput.placeholder = "$0.00";
+        valueInput.classList.add("article-value-input");
+        valueInput.addEventListener("input", () => {
+            saveFormData(); // Save on edit
+            updateTotalAppraisedValue(); // Recalculate total
+        });
+
+        articleDiv.appendChild(valueInput);
+
+        // Remove Button
         const removeBtn = document.createElement("button");
         removeBtn.type = "button";
         removeBtn.classList.add("removeArticleBtn");
@@ -365,16 +423,15 @@ document.addEventListener("DOMContentLoaded", () => {
         removeBtn.addEventListener("click", () => {
             articleDiv.remove();
             saveFormData(); // Update local storage after removal
+            updateTotalAppraisedValue(); // Recalculate total after removing article
         });
 
-        descriptionGroup.appendChild(descriptionLabel);
-        descriptionGroup.appendChild(descriptionTextarea);
-        articleDiv.appendChild(descriptionGroup);
         articleDiv.appendChild(removeBtn);
         articlesContainer.appendChild(articleDiv);
 
         if (shouldSave) {
             saveFormData();
+            updateTotalAppraisedValue(); // Calculate total after adding a new article
         }
     }
 
@@ -408,7 +465,11 @@ document.addEventListener("DOMContentLoaded", () => {
         const articles = [];
         articlesContainer.querySelectorAll(".article").forEach(articleDiv => {
             const articleText = articleDiv.querySelector("textarea").value;
-            articles.push({ description: articleText });
+            const appraisedValue = articleDiv.querySelector("input[id^='appraisedValue-']").value;
+            articles.push({
+                description: articleText,
+                appraisedValue: appraisedValue
+            });
         });
 
         // Return complete appraisal data
@@ -551,8 +612,10 @@ document.addEventListener("DOMContentLoaded", () => {
     loadFormData();
     // Add a default article if none exist
     if (articlesContainer.children.length === 0) {
-        addArticle({ description: "Insert Description Here:" }, true);
+        addArticle({ description: "Insert Description Here:", appraisedValue: "" }, true);
     }
     // Update data attributes for printing
     saveFormData();
+    // Calculate initial total
+    updateTotalAppraisedValue();
 });

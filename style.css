@@ -137,6 +137,8 @@ header h1 {
     padding: 15px;
     margin-bottom: 15px;
     background-color: #f9f9f9;
+    position: relative;
+    overflow: hidden;
 }
 
 .article textarea {
@@ -146,6 +148,18 @@ header h1 {
 
 .article .form-group {
     margin-bottom: 10px;
+}
+
+.article-value-input {
+    width: 150px;
+    text-align: right;
+    font-weight: bold;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-top: 10px;
+    float: right;
+    clear: both;
 }
 
 #addArticleBtn, .removeArticleBtn {
@@ -186,6 +200,16 @@ header h1 {
     width: auto; /* Adjust width for value */
     font-weight: bold;
     text-align: right;
+    background-color: #f9f9f9;
+    cursor: default;
+}
+
+.calculated-notice {
+    font-size: 0.8em;
+    color: #666;
+    font-style: italic;
+    text-align: right;
+    margin-top: 5px;
 }
 
 .appraiser-section-wrapper {
@@ -862,6 +886,46 @@ footer {
         font-size: 11pt !important;
     }
 
+    /* Article appraised value styling for print */
+    .article-value-input {
+        border: none !important;
+        border-bottom: 1px dotted #999 !important;
+        background-color: transparent !important;
+        width: 120px !important;
+        font-size: 11pt !important;
+        text-align: right;
+        font-weight: bold;
+        float: right;
+        padding: 4px 0 !important;
+        margin-top: 0 !important;
+        margin-bottom: 10px !important;
+    }
+
+    /* Commented out old styling */
+    /* .article-value-group {
+        margin-top: 5px;
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-end;
+        align-items: center;
+    }
+
+    .article-value-group label {
+        font-size: 9pt !important;
+        font-weight: bold;
+        margin-right: 10px;
+    }
+
+    .article-value-group input {
+        border: none !important;
+        border-bottom: 1px dotted #999 !important;
+        background-color: transparent !important;
+        max-width: 120px;
+        font-size: 11pt !important;
+        text-align: right;
+        font-weight: bold;
+    }
+
     .article:last-child {
         border-bottom: none;
     }
@@ -882,6 +946,11 @@ footer {
         border-bottom: 1px solid #d4af37 !important;
         width: 150px !important;
         text-align: right;
+        background-color: transparent !important;
+    }
+
+    .calculated-notice {
+        display: none; /* Hide in print mode */
     }
 
     .appraised-value label {
