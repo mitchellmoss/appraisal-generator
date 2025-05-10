@@ -228,56 +228,234 @@ footer {
 
 /* Print-specific styles */
 @media print {
+    @page {
+        margin: 0;
+        size: letter;
+    }
+
     body {
         background-color: #fff;
         padding: 0;
         margin: 0;
+        font-family: 'Bodoni MT', 'Didot', 'Times New Roman', serif;
     }
+
     .container {
         width: 100%;
         max-width: 100%;
         margin: 0;
-        border: 2px solid #000; /* More prominent border for print */
-        box-shadow: none;
-        padding: 20mm 15mm; /* Standard A4/Letter margins */
+        padding: 15mm 12mm;
         box-sizing: border-box;
+        background-color: #fff;
+        background-image:
+            radial-gradient(circle at 30px 30px, #f9f1de 2px, transparent 2px),
+            radial-gradient(circle at calc(100% - 30px) 30px, #f9f1de 2px, transparent 2px),
+            radial-gradient(circle at 30px calc(100% - 30px), #f9f1de 2px, transparent 2px),
+            radial-gradient(circle at calc(100% - 30px) calc(100% - 30px), #f9f1de 2px, transparent 2px);
+        border: none;
+        box-shadow: none;
+        position: relative;
     }
+
+    /* Elegant border styling */
+    .container::before {
+        content: '';
+        position: absolute;
+        top: 8mm;
+        left: 8mm;
+        right: 8mm;
+        bottom: 8mm;
+        border: 1px solid #d4af37;
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    /* Inner fancy border */
+    .container::after {
+        content: '';
+        position: absolute;
+        top: 10mm;
+        left: 10mm;
+        right: 10mm;
+        bottom: 10mm;
+        border: 1px double #d4af37;
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    /* Ornate corner elements */
+    header::before,
+    header::after,
+    footer::before,
+    footer::after {
+        content: '✦';
+        position: absolute;
+        font-size: 20pt;
+        color: #d4af37 !important;
+    }
+
+    header::before {
+        top: 12mm;
+        left: 12mm;
+    }
+
+    header::after {
+        top: 12mm;
+        right: 12mm;
+    }
+
+    footer::before {
+        bottom: 12mm;
+        left: 12mm;
+    }
+
+    footer::after {
+        bottom: 12mm;
+        right: 12mm;
+    }
+
     .action-buttons, #addArticleBtn, .removeArticleBtn {
-        display: none !important; /* Hide buttons in print view */
+        display: none !important;
     }
-    header, .client-info, .article-description-section, .appraised-value, .appraiser-signature, footer {
-        border-color: #000; /* Ensure borders are black for print */
+
+    header {
+        text-align: center;
+        margin-bottom: 20px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid #d4af37;
+        position: relative;
     }
+
+    header h1 {
+        margin: 0;
+        font-size: 2.8em;
+        font-weight: normal;
+        letter-spacing: 3px;
+        color: #333 !important;
+        text-transform: uppercase;
+        padding: 10px 0;
+    }
+
+    .logo-placeholder {
+        border: 2px solid #d4af37;
+        background-color: #fff8e7;
+        color: #d4af37 !important;
+    }
+
+    .company-info p {
+        margin: 2px 0;
+        font-size: 11pt;
+        font-style: italic;
+        color: #555 !important;
+    }
+
+    .certification-statement {
+        margin-top: 25px;
+        margin-bottom: 25px;
+        text-align: center;
+        font-size: 12pt;
+        line-height: 1.5;
+        font-style: italic;
+        color: #333 !important;
+    }
+
+    .client-info {
+        border-top: 1px solid #d4af37;
+        border-bottom: 1px solid #d4af37;
+        padding: 15px 0;
+        margin-bottom: 30px;
+    }
+
+    .form-group label {
+        font-weight: bold;
+        font-size: 10pt;
+        color: #555 !important;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
     .form-group input[type="text"],
     .form-group input[type="date"],
     .form-group textarea {
-        border: none; /* Remove borders from inputs for cleaner print */
+        border: none;
+        border-bottom: 1px dotted #999;
         background-color: transparent;
-        padding: 2px 0; /* Minimal padding */
+        padding: 4px 0;
+        font-family: 'Bodoni MT', 'Didot', 'Times New Roman', serif;
+        font-size: 12pt;
     }
-    .form-group input[type="text"]:not([value=""]) + label,
-    .form-group input[type="date"]:not([value=""]) + label,
-    .form-group textarea:not(:empty) + label {
-        /* Styles for labels when input has value, if needed for print */
-    }
-    .logo-placeholder {
-        border-color: #000;
-    }
+
     .article-description-section h2 {
-        background-color: #f0f0f0; /* Light gray for section header */
-        border-color: #000;
+        text-align: center;
+        font-size: 14pt;
+        padding: 10px;
+        background-color: #fff8e7;
+        border-top: 1px solid #d4af37;
+        border-bottom: 1px solid #d4af37;
+        margin: 20px 0;
+        font-weight: normal;
+        letter-spacing: 2px;
+        color: #333 !important;
+        text-transform: uppercase;
     }
+
     .article {
-        border-color: #aaa;
+        border: none;
+        border-bottom: 1px dotted #d4af37;
         background-color: transparent;
-        page-break-inside: avoid; /* Avoid breaking articles across pages */
+        padding: 15px 10px;
+        margin-bottom: 15px;
+        page-break-inside: avoid;
     }
+
+    .article:last-child {
+        border-bottom: none;
+    }
+
+    .appraised-value {
+        margin-top: 30px;
+        margin-bottom: 30px;
+        text-align: right;
+        font-size: 14pt;
+    }
+
+    .appraised-value input[type="text"] {
+        font-weight: bold;
+        color: #333 !important;
+        font-size: 14pt;
+        border-bottom: 2px solid #d4af37;
+    }
+
+    .appraiser-signature {
+        margin-top: 50px;
+        text-align: center;
+    }
+
+    .appraiser-signature .form-group {
+        display: inline-block;
+        width: 60%;
+        border-top: 1px solid #000;
+        padding-top: 5px;
+    }
+
+    .appraiser-signature .form-group input {
+        text-align: center;
+        font-size: 14pt;
+    }
+
+    footer {
+        margin-top: 40px;
+        padding-top: 15px;
+        border-top: 1px solid #d4af37;
+        text-align: center;
+        position: relative;
+    }
+
     .disclaimer {
-        font-size: 7pt; /* Smaller for print footer */
-    }
-    /* Ensure all text is black for printing */
-    * {
-        color: #000 !important;
+        font-size: 8pt;
+        color: #666 !important;
+        line-height: 1.4;
+        margin: 0 20px;
     }
 }
 
