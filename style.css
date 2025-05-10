@@ -823,16 +823,9 @@ footer {
         position: relative;
     }
 
-    /* Add signature line for print */
+    /* No signature line for print */
     .appraiser-signature::before {
-        content: '';
-        position: absolute;
-        top: 40px; /* Position in the middle of the padding space */
-        left: 50%;
-        transform: translateX(-50%);
-        width: 200px;
-        height: 1px;
-        border-bottom: 1px dotted #555;
+        display: none;
     }
 
     .appraiser-signature .form-group {
