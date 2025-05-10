@@ -1090,3 +1090,18 @@ body.pdf-mode {
     /* min-height: 100vh or height: 100% might be needed if not in @media print */
     /* The body already has display:flex, flex-direction:column from general styles */
 }
+
+@media print {
+    input[type="date"]::-webkit-calendar-picker-indicator {
+        display: none;
+        -webkit-appearance: none;
+    }
+
+    /* Optional: If you want to hide it for a specific ID */
+    /*
+    #appraisalDate::-webkit-calendar-picker-indicator {
+        display: none;
+        -webkit-appearance: none;
+    }
+    */
+}
