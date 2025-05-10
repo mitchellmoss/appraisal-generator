@@ -220,7 +220,7 @@ header h1 {
 
 .appraiser-signature {
     padding-top: 60px; /* Increased space for signature */
-    border-top: 1px solid #000;
+    border-top: none;
     position: relative;
     margin-top: auto; /* Push to bottom of container */
 }
