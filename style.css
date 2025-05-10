@@ -195,8 +195,14 @@ header h1 {
 }
 
 .appraiser-signature {
-    padding-top: 20px;
+    padding-top: 60px; /* Increased space for signature */
     border-top: 1px solid #000;
+    position: relative;
+}
+
+/* No signature line */
+.appraiser-signature::before {
+    display: none;
 }
 
 .appraiser-signature .form-group {
@@ -812,13 +818,21 @@ footer {
     }
 
     .appraiser-signature {
+        padding-top: 80px; /* Even more space for signature when printing */
         text-align: center;
         position: relative;
     }
 
-    /* Remove complex stamp and simplify */
+    /* Add signature line for print */
     .appraiser-signature::before {
-        display: none;
+        content: '';
+        position: absolute;
+        top: 40px; /* Position in the middle of the padding space */
+        left: 50%;
+        transform: translateX(-50%);
+        width: 200px;
+        height: 1px;
+        border-bottom: 1px dotted #555;
     }
 
     .appraiser-signature .form-group {
