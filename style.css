@@ -534,6 +534,11 @@ footer {
         size: letter; /* US Letter size instead of A4 */
     }
 
+    /* Hide the calculation notice when printing */
+    .calculated-notice {
+        display: none !important;
+    }
+
     html, body {
         height: 11in; /* Explicitly set to Letter page height */
         width: 8.5in; /* Letter page width */
@@ -1009,18 +1014,9 @@ footer {
         border: none !important;
     }
 
-    /* Add a "certified" look with diagonal text */
+    /* Removed certified appraisal text */
     .appraiser-signature::after {
-        content: 'CERTIFIED APPRAISAL';
-        position: absolute;
-        bottom: -50px;
-        right: 10%;
-        font-size: 11pt;
-        color: #d4af37;
-        opacity: 0.3;
-        font-weight: bold;
-        letter-spacing: 2px;
-        transform: rotate(-15deg);
+        display: none;
     }
 
     footer {
