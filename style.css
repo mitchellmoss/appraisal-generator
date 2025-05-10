@@ -1105,3 +1105,9 @@ body.pdf-mode {
     }
     */
 }
+
+@media print {
+  textarea {
+    resize: none !important;
+  }
+}
