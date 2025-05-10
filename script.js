@@ -54,19 +54,35 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // Save data to local storage
+    // Separate function to update client info data attributes for printing
+    function updateClientInfoAttributes() {
+        const clientInfoSection = document.querySelector(".client-info");
+        if (clientInfoSection) {
+            clientInfoSection.setAttribute("data-client-name", clientNameInput.value || "");
+            clientInfoSection.setAttribute("data-address1", address1Input.value || "");
+            clientInfoSection.setAttribute("data-address2", address2Input.value || "");
+        }
+    }
+
+    // Save data to local storage and update data attributes for printing
     function saveFormData() {
+        // Save to local storage
         for (const key in formElements) {
             if (formElements[key]) {
                 localStorage.setItem(key, formElements[key].value);
             }
         }
+
+        // Save articles
         const articles = [];
         articlesContainer.querySelectorAll(".article").forEach(articleDiv => {
             const articleText = articleDiv.querySelector("textarea").value;
             articles.push({ description: articleText });
         });
         localStorage.setItem("articles", JSON.stringify(articles));
+
+        // Update data attributes for printing
+        updateClientInfoAttributes();
     }
 
     // Add event listeners to save data on input change
@@ -366,11 +382,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Print functionality
     printBtn.addEventListener("click", () => {
-        window.print();
+        // Make sure all data attributes are updated before printing
+        updateClientInfoAttributes();
+
+        // Small delay to ensure all styles are applied
+        setTimeout(() => {
+            window.print();
+        }, 100);
     });
 
-    // Get appraisal data for saving
+    // Get appraisal data for saving and ensure data-attributes are updated
     function getAppraisalData() {
+        // Make sure all data attributes are set before continuing
+        updateClientInfoAttributes();
+
         // Collect form data
         const formData = {};
         for (const key in formElements) {
@@ -456,6 +481,12 @@ document.addEventListener("DOMContentLoaded", () => {
         // Remove buttons from the cloned content
         printableContent.querySelectorAll(".action-buttons, #addArticleBtn, .removeArticleBtn").forEach(el => el.remove());
 
+        // Make sure the header-top-border element is visible in the PDF
+        const headerTopBorder = printableContent.querySelector(".header-top-border");
+        if (headerTopBorder) {
+            headerTopBorder.style.display = "block";
+        }
+
         // Save inputs' current values
         printableContent.querySelectorAll("input[type=\"text\"], input[type=\"date\"], textarea").forEach(input => {
             if (input.value) {
@@ -535,6 +566,18 @@ document.addEventListener("DOMContentLoaded", () => {
                         radial-gradient(circle at 30px calc(100% - 30px), #f9f1de 2px, transparent 2px),
                         radial-gradient(circle at calc(100% - 30px) calc(100% - 30px), #f9f1de 2px, transparent 2px);
                     font-family: 'Playfair Display', 'Libre Baskerville', 'Bodoni MT', 'Didot', 'Times New Roman', serif;
+                }
+
+                /* Add the top border above APPRAISAL in PDF version */
+                .pdf-container .header-top-border {
+                    display: block;
+                    position: absolute;
+                    top: 8mm;
+                    left: 15mm;
+                    right: 15mm;
+                    height: 1px;
+                    background-color: #d4af37;
+                    z-index: 3;
                 }
 
                 .pdf-container .container::before {
@@ -679,6 +722,71 @@ document.addEventListener("DOMContentLoaded", () => {
             `;
             document.head.appendChild(tempStyle);
 
+            // Update the client info for the PDF to match the print version
+            updateClientInfoAttributes(); // Update main document attributes first
+
+            const pdfClientInfo = pdfContainer.querySelector(".client-info");
+            if (pdfClientInfo) {
+                // Add data attributes to the PDF client info section (duplicate in PDF container)
+                pdfClientInfo.setAttribute("data-client-name", clientNameInput.value || "");
+                pdfClientInfo.setAttribute("data-address1", address1Input.value || "");
+                pdfClientInfo.setAttribute("data-address2", address2Input.value || "");
+
+                // Add CSS rules specific to client info layout
+                tempStyle.innerHTML += `
+                    .pdf-container .client-info {
+                        display: block !important;
+                        padding: 20px 0;
+                        min-height: 100px;
+                        position: relative;
+                    }
+
+                    .pdf-container .client-info .form-group:not(.date-group) {
+                        display: none;
+                    }
+
+                    .pdf-container .client-info::before {
+                        content: attr(data-client-name) "\\A" attr(data-address1) "\\A" attr(data-address2);
+                        white-space: pre-line;
+                        font-family: 'Playfair Display', 'Times New Roman', serif;
+                        font-size: 14pt;
+                        line-height: 1.4;
+                        display: block;
+                        position: absolute;
+                        top: 15px;
+                        left: 0;
+                    }
+
+                    .pdf-container .date-group {
+                        position: absolute !important;
+                        top: 15px;
+                        right: 0;
+                        text-align: right;
+                    }
+
+                    .pdf-container .date-group label {
+                        display: none;
+                    }
+
+                    .pdf-container .date-group .input-value {
+                        border: none !important;
+                        font-family: 'Playfair Display', 'Libre Baskerville', 'Times New Roman', serif;
+                        font-size: 16pt;
+                        text-align: right;
+                        position: absolute;
+                        right: 0;
+                        top: 0;
+                    }
+                `;
+
+                // Ensure the date group is properly positioned
+                const dateGroup = pdfClientInfo.querySelector(".date-group");
+                if (dateGroup) {
+                    // Make sure it's still visible in the PDF
+                    dateGroup.style.display = "block";
+                }
+            }
+
             // Generate PDF with custom handling
             const worker = html2pdf().from(pdfContainer).set(options);
 
@@ -786,5 +894,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (articlesContainer.children.length === 0) {
         addArticle({ description: "Insert Description Here:" }, true);
     }
+    // Update data attributes for printing
+    saveFormData();
 });
 
