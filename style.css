@@ -235,6 +235,17 @@ footer {
     background-color: #218838;
 }
 
+#clearFormBtn {
+    background-color: #6c757d;
+    font-size: 0.85em;
+    margin-top: 10px;
+    padding: 8px 15px;
+}
+
+#clearFormBtn:hover {
+    background-color: #5a6268;
+}
+
 #editingNotice {
     margin-top: 10px;
     font-style: italic;

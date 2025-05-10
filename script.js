@@ -11,6 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const printBtn = document.getElementById("printBtn");
     const downloadBtn = document.getElementById("downloadBtn");
     const browseBtn = document.getElementById("browseBtn");
+    const clearFormBtn = document.getElementById("clearFormBtn");
 
     // Modal elements
     const appraisalBrowserModal = document.getElementById("appraisalBrowserModal");
@@ -761,6 +762,23 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     `;
     document.head.appendChild(style);
+
+    // Clear Form button with confirmation dialog
+    clearFormBtn.addEventListener("click", () => {
+        // Show confirmation dialog with warning
+        const isConfirmed = confirm("WARNING: This will clear all form data and remove all information from your browser's local storage. This action cannot be undone. Are you sure you want to proceed?");
+
+        if (isConfirmed) {
+            // Clear local storage
+            localStorage.clear();
+
+            // Reset the form to empty state
+            resetForm();
+
+            // Show success message
+            alert("Form has been cleared and local storage has been reset.");
+        }
+    });
 
     // Initial load
     loadFormData();
