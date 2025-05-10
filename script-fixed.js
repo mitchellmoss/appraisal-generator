@@ -1,4 +1,31 @@
 document.addEventListener("DOMContentLoaded", () => {
+    // API Key Management
+    const API_KEY_STORAGE_KEY = 'appraisalApiKey';
+
+    async function getApiKey() {
+        let apiKey = sessionStorage.getItem(API_KEY_STORAGE_KEY);
+        if (!apiKey) {
+            apiKey = prompt("Please enter the API Key to access appraisal data:");
+            if (apiKey) {
+                sessionStorage.setItem(API_KEY_STORAGE_KEY, apiKey);
+            } else {
+                alert("API Key is required to fetch or save data. Please refresh and try again.");
+                return null; // Or throw an error
+            }
+        }
+        return apiKey;
+    }
+
+    async function getApiHeaders() {
+        const apiKey = await getApiKey();
+        if (!apiKey) return null; // Handle case where user cancels prompt
+
+        return {
+            'Content-Type': 'application/json',
+            'X-API-KEY': apiKey
+        };
+    }
+
     // Form elements
     const clientNameInput = document.getElementById("clientName");
     const address1Input = document.getElementById("address1");
@@ -135,8 +162,12 @@ document.addEventListener("DOMContentLoaded", () => {
             noAppraisalsMessage.style.display = "none";
             appraisalsTableBody.innerHTML = "";
 
-            const response = await fetch('/api/appraisals');
+            const headers = await getApiHeaders();
+            if (!headers) return []; // API key prompt was cancelled or empty
+
+            const response = await fetch('/api/appraisals', { headers });
             if (!response.ok) {
+                if (response.status === 401) alert('Unauthorized: Invalid or missing API Key.');
                 throw new Error('Failed to fetch appraisals');
             }
 
@@ -144,6 +175,7 @@ document.addEventListener("DOMContentLoaded", () => {
             return appraisals;
         } catch (error) {
             console.error('Error fetching appraisals:', error);
+            // Do not show alert here as it might be triggered on initial load if key is bad
             return [];
         } finally {
             appraisalLoadingMessage.style.display = "none";
@@ -153,8 +185,12 @@ document.addEventListener("DOMContentLoaded", () => {
     // Fetch a specific appraisal by ID
     async function fetchAppraisalById(id) {
         try {
-            const response = await fetch(`/api/appraisals/${id}`);
+            const headers = await getApiHeaders();
+            if (!headers) return null;
+
+            const response = await fetch(`/api/appraisals/${id}`, { headers });
             if (!response.ok) {
+                if (response.status === 401) alert('Unauthorized: Invalid or missing API Key.');
                 throw new Error('Failed to fetch appraisal');
             }
 
@@ -175,11 +211,16 @@ document.addEventListener("DOMContentLoaded", () => {
                 return false;
             }
 
+            const headers = await getApiHeaders();
+            if (!headers) return false; // User cancelled API key prompt
+
             const response = await fetch(`/api/appraisals/${id}`, {
-                method: 'DELETE'
+                method: 'DELETE',
+                headers: headers
             });
 
             if (!response.ok) {
+                if (response.status === 401) alert('Unauthorized: Invalid or missing API Key.');
                 throw new Error('Failed to delete appraisal');
             }
 
@@ -545,15 +586,20 @@ document.addEventListener("DOMContentLoaded", () => {
                 appraisalData.updatedAt = new Date().toISOString();
             }
 
+            const apiHeaders = await getApiHeaders();
+            if (!apiHeaders) {
+                alert("Cannot save appraisal without a valid API Key.");
+                throw new Error("API Key not provided");
+            }
+
             const response = await fetch(url, {
                 method: method,
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: apiHeaders, // Use the headers with API key
                 body: JSON.stringify(appraisalData)
             });
 
             if (!response.ok) {
+                if (response.status === 401) alert('Unauthorized: Invalid or missing API Key. Appraisal not saved.');
                 const errorData = await response.json();
                 throw new Error(errorData.error || 'Failed to save appraisal');
             }
