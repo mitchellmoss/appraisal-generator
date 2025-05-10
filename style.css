@@ -674,14 +674,19 @@ footer {
     header::before {
         content: '';
         position: absolute;
-        width: 8mm;
-        height: 8mm;
         background-size: contain;
         background-repeat: no-repeat;
         z-index: 2;
-        top: 8mm;
-        left: 7mm;
+        top: -9999px !important; /* Aggressively move off-screen */
+        left: -9999px !important; /* Aggressively move off-screen */
         background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'%3E%3Ccircle cx='10' cy='10' r='7' fill='none' stroke='%23d4af37' stroke-width='1'/%3E%3Ccircle cx='10' cy='10' r='3' fill='%23d4af37' fill-opacity='0.3'/%3E%3C/svg%3E");
+        width: 0 !important;
+        height: 0 !important;
+        background: none !important;
+        border: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        display: none !important; /* Ensure this decorative element is hidden in print, allowing the rule below to take over */
     }
 
     header::after {
@@ -691,6 +696,7 @@ footer {
         right: 7mm;
         font-size: 10pt;
         color: #d4af37;
+        /* display: none !important; */ /* Reverted temporary hide */
     }
 
     /* Add decorative element after the title */
@@ -714,24 +720,24 @@ footer {
         padding-bottom: 20px;
         border-bottom: none; /* Remove the bottom border completely */
         position: relative;
+        /* outline: 2px solid red !important; */ /* Removed diagnostic outline */
     }
 
     /* Special element for the top border above APPRAISAL */
     .header-top-border {
-        display: none; /* Hide in normal view */
-    }
-
-    @media print {
-        .header-top-border {
-            display: block;
-            position: absolute;
-            top: 8mm; /* Position above the header */
-            left: 15mm;
-            right: 15mm;
-            height: 1px;
-            background-color: #d4af37;
-            z-index: 3;
-        }
+        display: block;
+        position: absolute;
+        top: 8mm; /* Position above the header */
+        left: 15mm;
+        right: 15mm;
+        height: 0 !important; /* Use border for thickness */
+        background-color: transparent !important;
+        z-index: 3;
+        border-top: 1px solid #d4af37 !important;
+        border-left: none !important;
+        border-right: none !important;
+        border-bottom: none !important;
+        box-shadow: none !important;
     }
 
     header h1 {
@@ -751,11 +757,13 @@ footer {
     header::before {
         content: '';
         position: absolute;
-        top: -10px; /* Position above the header */
-        left: 0;
-        right: 0;
+        top: -10px !important; /* Position above the header */
+        left: 0 !important;
+        right: 0 !important;
         height: 1px;
         background-color: #d4af37;
+        width: auto !important; /* Ensure full width with left/right properties */
+        background-image: none !important; /* Remove any inherited background image */
     }
 
     /* Remove the line under the header */
