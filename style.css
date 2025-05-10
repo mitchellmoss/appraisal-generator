@@ -119,6 +119,12 @@ header h1 {
     align-self: start; /* Align with top of client name */
 }
 
+.article-description-section {
+    background-color: #f0f0f0; /* Light gray background */
+    padding: 20px;
+    border: 1px solid #ccc;
+    margin-bottom: 20px;
+}
 .article-description-section h2 {
     text-align: center;
     font-size: 1.2em;
