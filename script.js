@@ -156,7 +156,7 @@ document.addEventListener("DOMContentLoaded", () => {
     downloadBtn.addEventListener("click", async () => {
         const clientName = clientNameInput.value.trim().replace(/[^a-zA-Z0-9]/g, "_") || "CLIENTNAME";
         const currentDate = new Date().toISOString().slice(0, 10);
-        const fileName = `appraisal_${clientName}_${currentDate}.html`;
+        const fileName = `appraisal_${clientName}_${currentDate}.pdf`;
 
         // Create a clone of the printable content
         const printableContent = document.querySelector(".container").cloneNode(true);
@@ -164,33 +164,257 @@ document.addEventListener("DOMContentLoaded", () => {
         // Remove buttons from the cloned content
         printableContent.querySelectorAll(".action-buttons, #addArticleBtn, .removeArticleBtn").forEach(el => el.remove());
 
-        // Inline styles for inputs for better download appearance
+        // Save inputs' current values
         printableContent.querySelectorAll("input[type=\"text\"], input[type=\"date\"], textarea").forEach(input => {
-            input.style.border = "none";
-            input.setAttribute("readonly", true); // Make them readonly in the downloaded file
+            if (input.value) {
+                // For date inputs specifically, format the date nicely
+                if (input.type === "date" && input.value) {
+                    const date = new Date(input.value);
+                    if (!isNaN(date.getTime())) {
+                        const formattedDate = date.toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
+                        });
+                        input.outerHTML = `<div class="input-value">${formattedDate}</div>`;
+                    }
+                } else {
+                    // Create a span with the input's value
+                    input.outerHTML = `<div class="input-value">${input.value}</div>`;
+                }
+            } else {
+                // For empty inputs, add a spaceholder line
+                input.outerHTML = `<div class="input-value">&nbsp;</div>`;
+            }
         });
 
-        const htmlContent = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Appraisal</title><link rel="stylesheet" href="style.css"><style>body{margin:20px;} .container{border:1px solid #000 !important; box-shadow:none !important;} input, textarea { background-color: transparent !important; -webkit-print-color-adjust: exact !important; color-adjust: exact !important; } </style></head><body>${printableContent.outerHTML}</body></html>`;
+        // Add a special class for PDF generation to trigger print styles
+        const pdfContainer = document.createElement('div');
+        pdfContainer.className = 'pdf-container';
+        pdfContainer.appendChild(printableContent);
+        document.body.appendChild(pdfContainer);
 
-        // Client-side download
-        const blob = new Blob([htmlContent], { type: "text/html" });
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = fileName;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(link.href);
+        // Configure html2pdf options
+        const options = {
+            margin: 0,
+            filename: fileName,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: {
+                scale: 2,
+                useCORS: true,
+                letterRendering: true,
+                scrollX: 0,
+                scrollY: 0,
+                windowWidth: document.documentElement.offsetWidth,
+                windowHeight: document.documentElement.offsetHeight
+            },
+            jsPDF: {
+                unit: 'mm',
+                format: 'a4',
+                orientation: 'portrait',
+                compress: true
+            }
+        };
 
-        // Server-side save
         try {
-            const appraisalData = getAppraisalData();
-            const serverResponse = await saveAppraisalToServer(appraisalData);
-            console.log('Appraisal saved to server:', serverResponse);
-            alert(`Appraisal downloaded and saved to server. ID: ${serverResponse.id}`);
+            // Temporarily apply print styles to the cloned container
+            const tempStyle = document.createElement('style');
+            tempStyle.innerHTML = `
+                .pdf-container {
+                    width: 210mm;
+                    height: 297mm;
+                    overflow: hidden;
+                    position: relative;
+                    padding: 0;
+                    margin: 0 auto;
+                }
+
+                .pdf-container .container {
+                    background-color: #fff;
+                    padding: 10mm;
+                    position: relative;
+                    width: 210mm;
+                    height: 297mm;
+                    box-sizing: border-box;
+                    margin: 0 auto;
+                    background-image:
+                        radial-gradient(circle at 30px 30px, #f9f1de 2px, transparent 2px),
+                        radial-gradient(circle at calc(100% - 30px) 30px, #f9f1de 2px, transparent 2px),
+                        radial-gradient(circle at 30px calc(100% - 30px), #f9f1de 2px, transparent 2px),
+                        radial-gradient(circle at calc(100% - 30px) calc(100% - 30px), #f9f1de 2px, transparent 2px);
+                    font-family: 'Playfair Display', 'Libre Baskerville', 'Bodoni MT', 'Didot', 'Times New Roman', serif;
+                }
+
+                .pdf-container .container::before {
+                    content: '';
+                    position: absolute;
+                    top: 5mm;
+                    left: 5mm;
+                    right: 5mm;
+                    bottom: 5mm;
+                    border: 1px solid #d4af37;
+                    pointer-events: none;
+                    z-index: 1;
+                }
+
+                .pdf-container .container::after {
+                    content: '';
+                    position: absolute;
+                    top: 7mm;
+                    left: 7mm;
+                    right: 7mm;
+                    bottom: 7mm;
+                    border: 1px double #d4af37;
+                    pointer-events: none;
+                    z-index: 1;
+                }
+
+                .pdf-container header,
+                .pdf-container footer {
+                    position: relative;
+                }
+
+                .pdf-container header::before,
+                .pdf-container header::after,
+                .pdf-container footer::before,
+                .pdf-container footer::after {
+                    content: '✦';
+                    position: absolute;
+                    font-size: 18pt;
+                    color: #d4af37;
+                }
+
+                .pdf-container header::before {
+                    top: 0;
+                    left: 15mm;
+                }
+
+                .pdf-container header::after {
+                    top: 0;
+                    right: 15mm;
+                }
+
+                .pdf-container footer::before {
+                    bottom: 5mm;
+                    left: 15mm;
+                }
+
+                .pdf-container footer::after {
+                    bottom: 5mm;
+                    right: 15mm;
+                }
+
+                .pdf-container header {
+                    border-bottom: 2px solid #d4af37;
+                }
+
+                .pdf-container h1 {
+                    font-size: 2.8em;
+                    letter-spacing: 3px;
+                    color: #333;
+                    text-transform: uppercase;
+                }
+
+                .pdf-container .logo-placeholder {
+                    border: 2px solid #d4af37;
+                    background-color: #fff8e7;
+                    color: #d4af37;
+                }
+
+                .pdf-container .company-info p {
+                    font-style: italic;
+                    color: #555;
+                }
+
+                .pdf-container .certification-statement {
+                    text-align: center;
+                    font-style: italic;
+                }
+
+                .pdf-container .client-info {
+                    border-top: 1px solid #d4af37;
+                    border-bottom: 1px solid #d4af37;
+                }
+
+                .pdf-container .form-group label {
+                    font-weight: bold;
+                    color: #555;
+                    text-transform: uppercase;
+                    letter-spacing: 1px;
+                }
+
+                .pdf-container .input-value {
+                    border-bottom: 1px dotted #999;
+                    padding: 4px 0;
+                    min-height: 1.2em;
+                    font-family: 'Playfair Display', 'Libre Baskerville', 'Bodoni MT', 'Didot', 'Times New Roman', serif;
+                    font-size: 12pt;
+                }
+
+                .pdf-container .article-description-section h2 {
+                    background-color: #fff8e7;
+                    border-top: 1px solid #d4af37;
+                    border-bottom: 1px solid #d4af37;
+                    font-weight: normal;
+                    letter-spacing: 2px;
+                    color: #333;
+                    text-transform: uppercase;
+                }
+
+                .pdf-container .article {
+                    border-bottom: 1px dotted #d4af37;
+                    background-color: transparent;
+                }
+
+                .pdf-container .appraised-value .input-value {
+                    font-weight: bold;
+                    color: #333;
+                    border-bottom: 2px solid #d4af37;
+                }
+
+                .pdf-container .appraiser-signature .form-group {
+                    border-top: 1px solid #000;
+                    text-align: center;
+                }
+
+                .pdf-container footer {
+                    border-top: 1px solid #d4af37;
+                }
+
+                .pdf-container .disclaimer {
+                    color: #666;
+                }
+            `;
+            document.head.appendChild(tempStyle);
+
+            // Generate PDF with custom handling
+            const worker = html2pdf().from(pdfContainer).set(options);
+
+            // Add specific handling for scaling and positioning
+            worker.toContainer().toCanvas().toPdf().save();
+
+            // Clean up
+            document.body.removeChild(pdfContainer);
+            document.head.removeChild(tempStyle);
+
+            // Server-side save
+            try {
+                const appraisalData = getAppraisalData();
+                const serverResponse = await saveAppraisalToServer(appraisalData);
+                console.log('Appraisal saved to server:', serverResponse);
+                alert(`Appraisal downloaded as PDF and saved to server. ID: ${serverResponse.id}`);
+            } catch (error) {
+                console.error('Failed to save appraisal to server:', error);
+                // Don't show error alert here since PDF was successfully generated
+            }
         } catch (error) {
-            console.error('Failed to save appraisal to server:', error);
-            alert(`Appraisal downloaded, but could not be saved to server: ${error.message || 'Server connection failed'}`);
+            console.error('Error generating PDF:', error);
+            alert('There was an error generating the PDF. Please try again.');
+
+            // Clean up on error
+            if (document.body.contains(pdfContainer)) {
+                document.body.removeChild(pdfContainer);
+            }
         }
     });
 
