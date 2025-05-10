@@ -3,11 +3,29 @@ document.addEventListener("DOMContentLoaded", () => {
     const API_KEY_STORAGE_KEY = 'appraisalApiKey';
 
     async function getApiKey() {
-        let apiKey = sessionStorage.getItem(API_KEY_STORAGE_KEY);
+        const API_KEY_EXPIRATION_KEY = 'appraisalApiKeyTimestamp';
+        const ONE_YEAR_IN_MS = 365 * 24 * 60 * 60 * 1000;
+
+        let apiKey = localStorage.getItem(API_KEY_STORAGE_KEY);
+        let apiKeyTimestamp = localStorage.getItem(API_KEY_EXPIRATION_KEY);
+
+        if (apiKey && apiKeyTimestamp) {
+            const now = new Date().getTime();
+            if (now - parseInt(apiKeyTimestamp) < ONE_YEAR_IN_MS) {
+                return apiKey; // Key is valid and not expired
+            } else {
+                // Key expired, clear it
+                localStorage.removeItem(API_KEY_STORAGE_KEY);
+                localStorage.removeItem(API_KEY_EXPIRATION_KEY);
+                apiKey = null; // Force re-prompt
+            }
+        }
+
         if (!apiKey) {
             apiKey = prompt("Please enter the API Key to access appraisal data:");
             if (apiKey) {
-                sessionStorage.setItem(API_KEY_STORAGE_KEY, apiKey);
+                localStorage.setItem(API_KEY_STORAGE_KEY, apiKey);
+                localStorage.setItem(API_KEY_EXPIRATION_KEY, new Date().getTime().toString());
             } else {
                 alert("API Key is required to fetch or save data. Please refresh and try again.");
                 return null; // Or throw an error
