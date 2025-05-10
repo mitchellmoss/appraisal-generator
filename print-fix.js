@@ -366,12 +366,19 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             // Return complete appraisal data with the calculated total
-            return {
+            let completeData = {
                 ...formData,
                 articles: articles,
                 appraisedValue: totalAppraisedValue,
                 generatedAt: new Date().toISOString()
             };
+
+            // If there's a current appraisal ID, include it for potential updates
+            if (window.currentAppraisal && window.currentAppraisal.id) {
+                completeData.id = window.currentAppraisal.id;
+            }
+
+            return completeData;
         };
     }
 
@@ -379,47 +386,37 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!window.saveAppraisalToServer) {
         window.saveAppraisalToServer = async function(appraisalData) {
             try {
-                // Check if we're updating an existing appraisal
-                const editingNotice = document.getElementById("editingNotice");
-                const currentAppraisalId = document.getElementById("currentAppraisalId");
-                const isUpdate = editingNotice && editingNotice.style.display !== "none" && currentAppraisalId;
-
-                // Determine the method and URL based on whether we're updating
+                // Determine if this is an update based on appraisalData containing an ID
+                const isUpdate = !!appraisalData.id;
                 const method = isUpdate ? 'PUT' : 'POST';
                 let url = '/api/appraisals';
 
-                // If updating, use the id property from currentAppraisal if available
                 if (isUpdate) {
-                    // First try to get the ID from the window.currentAppraisal object
-                    if (window.currentAppraisal && window.currentAppraisal.id) {
-                        url = `/api/appraisals/${window.currentAppraisal.id}`;
-                    } else {
-                        // Fall back to extracting from text content, dealing with truncated IDs
-                        const idMatch = currentAppraisalId.textContent.match(/ID: ([^.)]+)/);
-                        if (idMatch && idMatch[1]) {
-                            // The ID in the display might be truncated, so we check if it ends with "..."
-                            let id = idMatch[1].trim();
-                            if (id.endsWith('...')) {
-                                console.log("ID is truncated in display, cannot use for API call");
-                                // We can't use a truncated ID, so we'll create a new appraisal instead
-                                return Promise.reject(new Error("Cannot update with a truncated ID. Creating a new appraisal instead."));
-                            } else {
-                                url = `/api/appraisals/${id}`;
-                            }
-                        } else {
-                            console.log("Could not extract ID from currentAppraisalId text");
-                            // Create a new appraisal instead
-                            return Promise.reject(new Error("Cannot update without a valid ID. Creating a new appraisal instead."));
-                        }
+                    // Ensure the ID is not truncated if it came from a display element somehow
+                    // though ideally window.currentAppraisal.id is the clean source.
+                    if (String(appraisalData.id).endsWith('...')) {
+                        console.log("ID is truncated, cannot use for API call. Appraisal ID:", appraisalData.id);
+                        return Promise.reject(new Error("Cannot update with a truncated ID. Creating a new appraisal instead."));
                     }
+                    url = `/api/appraisals/${appraisalData.id}`;
                 }
+
+                // Create a shallow copy of appraisalData to remove 'id' from the body for POST requests
+                // For PUT requests, the ID is in the URL, and some backends might not want it in the body.
+                // However, many REST APIs are fine with ID in body for PUT. We'll send it for now.
+                // If creating (POST), we definitely don't want to send an 'id' field in the body.
+                const payload = { ...appraisalData };
+                if (method === 'POST') {
+                    delete payload.id; // Ensure no ID is sent when creating a new record
+                }
+
 
                 const response = await fetch(url, {
                     method: method,
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(appraisalData)
+                    body: JSON.stringify(payload)
                 });
 
                 if (!response.ok) {
