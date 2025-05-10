@@ -25,13 +25,14 @@ body {
 }
 
 /* Ornate border styling - simplified for web */
+/*
 .container::before, .container::after {
     content: '';
     position: absolute;
-    height: 98%; 
+    height: 98%;
     width: 10px;
     background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="100"><path d="M0 0 Q5 50 0 100" stroke="black" fill="none" stroke-width="1"/></svg>'); /* Simplified flourish */
-    background-repeat: repeat-y;
+/*    background-repeat: repeat-y;
     top: 1%;
 }
 
@@ -42,6 +43,7 @@ body {
 .container::after {
     right: 10px;
 }
+*/
 
 header {
     text-align: center;
@@ -611,7 +613,7 @@ footer {
         width: 100%;
         max-width: 100%;
         margin: 0;
-        padding: 15mm 12mm;
+        padding: 15mm 12mm 5mm 12mm; /* Reduced bottom padding */
         box-sizing: border-box;
         background-color: #fff;
         border: none;
@@ -971,7 +973,7 @@ footer {
     }
 
     .appraiser-signature {
-        padding-top: 80px; /* Even more space for signature when printing */
+        padding-top: 20px; /* Reduced space for signature when printing */
         text-align: center;
         position: relative;
     }
