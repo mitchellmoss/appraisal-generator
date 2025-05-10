@@ -90,7 +90,7 @@ app.get('/api/appraisals', (req, res) => {
     try {
         const files = fs.readdirSync(APPRAISALS_DIR)
             .filter(file => file.endsWith('.json'));
-        
+
         const appraisals = files.map(file => {
             const data = JSON.parse(fs.readFileSync(path.join(APPRAISALS_DIR, file), 'utf8'));
             return {
@@ -98,17 +98,92 @@ app.get('/api/appraisals', (req, res) => {
                 clientName: data.clientName,
                 createdAt: data.createdAt,
                 updatedAt: data.updatedAt,
-                appraisalDate: data.appraisalDate
+                appraisalDate: data.appraisalDate,
+                appraisedValue: data.appraisedValue
             };
         });
-        
+
         // Sort by creation date, newest first
         appraisals.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-        
+
         res.json(appraisals);
     } catch (error) {
         console.error('Error listing appraisals:', error);
         res.status(500).json({ error: 'Failed to list appraisals' });
+    }
+});
+
+/**
+ * PUT /api/appraisals/:id
+ * Updates an existing appraisal
+ */
+app.put('/api/appraisals/:id', (req, res) => {
+    try {
+        const appraisalId = req.params.id;
+        const filePath = path.join(APPRAISALS_DIR, `${appraisalId}.json`);
+
+        // Check if appraisal exists
+        if (!fs.existsSync(filePath)) {
+            return res.status(404).json({ error: 'Appraisal not found' });
+        }
+
+        // Read existing appraisal to get metadata
+        const existingData = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+
+        // Validate required fields in the update
+        const appraisalData = req.body;
+        if (!appraisalData || !appraisalData.clientName) {
+            return res.status(400).json({ error: 'Missing required appraisal data' });
+        }
+
+        // Preserve metadata and update
+        const updatedData = {
+            ...appraisalData,
+            id: existingData.id, // Ensure ID doesn't change
+            createdAt: existingData.createdAt, // Preserve original creation date
+            updatedAt: new Date().toISOString() // Update the modified timestamp
+        };
+
+        // Save the updated appraisal
+        fs.writeFileSync(filePath, JSON.stringify(updatedData, null, 2));
+
+        // Return success
+        res.json({
+            id: updatedData.id,
+            message: 'Appraisal updated successfully',
+            updatedAt: updatedData.updatedAt
+        });
+    } catch (error) {
+        console.error('Error updating appraisal:', error);
+        res.status(500).json({ error: 'Failed to update appraisal' });
+    }
+});
+
+/**
+ * DELETE /api/appraisals/:id
+ * Deletes an appraisal by ID
+ */
+app.delete('/api/appraisals/:id', (req, res) => {
+    try {
+        const appraisalId = req.params.id;
+        const filePath = path.join(APPRAISALS_DIR, `${appraisalId}.json`);
+
+        // Check if appraisal exists
+        if (!fs.existsSync(filePath)) {
+            return res.status(404).json({ error: 'Appraisal not found' });
+        }
+
+        // Delete the file
+        fs.unlinkSync(filePath);
+
+        // Return success
+        res.json({
+            id: appraisalId,
+            message: 'Appraisal deleted successfully'
+        });
+    } catch (error) {
+        console.error('Error deleting appraisal:', error);
+        res.status(500).json({ error: 'Failed to delete appraisal' });
     }
 });
 

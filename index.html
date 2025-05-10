@@ -11,6 +11,46 @@
     <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 </head>
 <body>
+    <!-- Browser modal for past appraisals -->
+    <div id="appraisalBrowserModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Saved Appraisals</h2>
+                <span class="close-modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="search-filter">
+                    <input type="text" id="appraisalSearch" placeholder="Search by client name...">
+                    <div class="filter-controls">
+                        <label for="sortBy">Sort by:</label>
+                        <select id="sortBy">
+                            <option value="recent">Most Recent</option>
+                            <option value="clientName">Client Name</option>
+                            <option value="value">Appraised Value</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="appraisal-list">
+                    <table id="appraisalsTable">
+                        <thead>
+                            <tr>
+                                <th>Client Name</th>
+                                <th>Date</th>
+                                <th>Appraised Value</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="appraisalsTableBody">
+                            <!-- Appraisals will be listed here -->
+                        </tbody>
+                    </table>
+                    <div id="appraisalLoadingMessage">Loading appraisals...</div>
+                    <div id="noAppraisalsMessage" style="display: none;">No appraisals found</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="container">
         <header>
             <div class="logo-container">
@@ -81,8 +121,12 @@
         </footer>
 
         <div class="action-buttons">
+            <button type="button" id="browseBtn">Browse Saved</button>
             <button type="button" id="printBtn">Print</button>
             <button type="button" id="downloadBtn">Download PDF</button>
+            <div id="editingNotice" style="display: none;">
+                <p>Editing saved appraisal: <span id="currentAppraisalId"></span></p>
+            </div>
         </div>
     </div>
 
