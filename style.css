@@ -188,8 +188,13 @@ header h1 {
     text-align: right;
 }
 
+.appraiser-section-wrapper {
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+}
+
 .appraiser-signature {
-    margin-top: 40px;
     padding-top: 20px;
     border-top: 1px solid #000;
 }
@@ -199,7 +204,6 @@ header h1 {
 }
 
 footer {
-    margin-top: auto;
     padding-top: 15px;
     border-top: 1px solid #ccc;
     text-align: center;
@@ -812,8 +816,13 @@ footer {
         margin-right: 10px;
     }
 
+    .appraiser-section-wrapper {
+        margin-top: auto;
+        display: flex;
+        flex-direction: column;
+    }
+
     .appraiser-signature {
-        margin-top: 100px;
         text-align: center;
         position: relative;
     }
