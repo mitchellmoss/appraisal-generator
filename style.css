@@ -472,7 +472,7 @@ footer {
     display: flex !important;
     flex-direction: column !important;
     min-height: 297mm !important;
-    height: auto !important;
+    height: 297mm !important;
     width: 210mm !important;
     margin: 0 auto !important;
     flex: 1 !important;
@@ -1048,5 +1048,40 @@ footer {
         background-color: transparent;
         border: none;
     }
+
+
+/* === Fix for PDF page height issues === */
+
+/* Ensure html and body behave correctly in print context */
+@media print {
+  html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    background-color: #fff; /* Ensure clean background for printing */
+  }
+
+  /* If .pdf-mode is on body, these styles will apply during print */
+  body.pdf-mode {
+    height: 100% !important; /* Reinforce full height */
+    margin: 0 !important;
+    padding: 0 !important;
+    background-color: #fff !important;
+    box-sizing: border-box;
+  }
+
+  /* Ensure the container is also respecting box-sizing if not already */
+  .pdf-mode .container {
+    box-sizing: border-box !important;
+  }
 }
 
+/* General styles for body when pdf-mode is active,
+   in case @media print isn't the only context or for higher specificity */
+body.pdf-mode {
+    margin: 0 !important;
+    padding: 0 !important;
+    background-color: #fff !important;
+    /* min-height: 100vh or height: 100% might be needed if not in @media print */
+    /* The body already has display:flex, flex-direction:column from general styles */
+}

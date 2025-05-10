@@ -116,7 +116,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         page-break-inside: avoid !important;
                         page-break-after: avoid !important;
                         page-break-before: avoid !important;
-                        transform: scale(0.95) !important; /* Slightly scale down content */
+                        /* transform: scale(0.95) !important; */ /* Slightly scale down content - REMOVED to prevent whitespace */
                         transform-origin: top center !important;
                     }
 
@@ -201,23 +201,23 @@ document.addEventListener("DOMContentLoaded", () => {
 
             // Check how many articles we have and adjust scaling if needed
             const articleCount = document.querySelectorAll('.article').length;
-            if (articleCount > 3) {
+            // if (articleCount > 3) { // REMOVED SCALING LOGIC
                 // Add additional scaling for many articles
-                const extraScaleStyle = document.createElement('style');
-                extraScaleStyle.id = 'extra-scale-style';
-                extraScaleStyle.textContent = `
-                    @media print {
-                        .container {
-                            transform: scale(${0.95 - (articleCount - 3) * 0.02}) !important;
-                        }
-
-                        .article textarea {
-                            height: ${Math.max(20, 40 - (articleCount - 3) * 5)}px !important;
-                        }
-                    }
-                `;
-                document.head.appendChild(extraScaleStyle);
-            }
+                // const extraScaleStyle = document.createElement('style');
+                // extraScaleStyle.id = 'extra-scale-style';
+                // extraScaleStyle.textContent = `
+                //     @media print {
+                //         .container {
+                //             transform: scale(${0.95 - (articleCount - 3) * 0.02}) !important;
+                //         }
+                //
+                //         .article textarea {
+                //             height: ${Math.max(20, 40 - (articleCount - 3) * 5)}px !important;
+                //         }
+                //     }
+                // `;
+                // document.head.appendChild(extraScaleStyle);
+            // }
 
             // Print the page
             window.print();
@@ -229,10 +229,10 @@ document.addEventListener("DOMContentLoaded", () => {
                     styleElement.remove();
                 }
 
-                const extraScaleElement = document.getElementById('extra-scale-style');
-                if (extraScaleElement) {
-                    extraScaleElement.remove();
-                }
+                // const extraScaleElement = document.getElementById('extra-scale-style'); // REMOVED SCALING LOGIC
+                // if (extraScaleElement) {
+                //     extraScaleElement.remove();
+                // }
             }, 1000);
         }, true); // Use capture phase to override existing listeners
     }
